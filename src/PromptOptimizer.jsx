@@ -144,6 +144,25 @@ const DEFAULT_BLUEPRINTS = [
   }
 ];
 
+// --- PRO MODE (Option A: Whop Pro link via ?pro=true) ---
+const isProUserFromUrl = () => {
+  try {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('pro') === 'true';
+  } catch {
+    return false;
+  }
+};
+
+// Free plan limits (simple MVP gating)
+const FREE_RUN_LIMIT = 5;
+const FREE_BLUEPRINT_LIMIT = 3;
+const PRO_ONLY_MODELS = ['claude', 'o1', 'grok'];
+
+// Replace this with your Whop product URL
+const WHOP_UPGRADE_URL = 'https://whop.com/';
+
 // --- 4. HELPERS ---
 const parseTemplateVariables = (text) => {
   if (!text || typeof text !== 'string') return [];
@@ -297,9 +316,11 @@ export default function PromptOptimizer() {
   const [resultTab, setResultTab] = useState('optimized');
   const [lastInputUsed, setLastInputUsed] = useState('');
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   // --- Effects ---
   useEffect(() => {
+    setIsPro(isProUserFromUrl());
     try {
       const saved = localStorage.getItem(storageKey('myBlueprints'));
       if (saved) {
@@ -419,6 +440,13 @@ export default function PromptOptimizer() {
   // --- Actions ---
   const saveBlueprint = () => {
     if (!editorName.trim() || !editorContent.trim()) return alert("Name and Content required");
+    // --- Free/Pro gating for custom blueprints ---
+    if (!isPro) {
+      const customCount = blueprints.filter(b => b && !b.isSystem).length;
+      if (customCount >= FREE_BLUEPRINT_LIMIT) {
+        return alert(`Free plan allows up to ${FREE_BLUEPRINT_LIMIT} custom blueprints. Upgrade to Pro for unlimited.`);
+      }
+    }
     let previousVersions = [];
     if (editorId) {
       const existing = blueprints.find(b => b.id === editorId);
@@ -492,6 +520,22 @@ export default function PromptOptimizer() {
     if (!finalUserPrompt.trim()) {
       setIsGenerating(false);
       return;
+    }
+    // --- Free/Pro gating (MVP) ---
+    if (!isPro) {
+      // Limit free generations using local history count
+      if ((history?.length || 0) >= FREE_RUN_LIMIT) {
+        setIsGenerating(false);
+        alert(`Free plan limit reached (${FREE_RUN_LIMIT} generations). Upgrade to Pro for unlimited prompts.`);
+        return;
+      }
+
+      // Lock Pro-only models
+      if (PRO_ONLY_MODELS.includes(selectedModel.id)) {
+        setIsGenerating(false);
+        alert('That target model is available on the Pro plan.');
+        return;
+      }
     }
     setLastInputUsed(finalUserPrompt);
 
@@ -597,7 +641,14 @@ export default function PromptOptimizer() {
               <BrainCircuit className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 leading-tight">PromptAlchemy</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 leading-tight">PromptAlchemy</h1>
+                {isPro && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                    PRO
+                  </span>
+                )}
+              </div>
               <div className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">IDE v5.0</div>
             </div>
           </div>
@@ -891,9 +942,21 @@ export default function PromptOptimizer() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-2 px-6 text-center text-[10px] text-gray-400 flex-shrink-0">
-        <button onClick={() => setShowPrivacy(true)} className="hover:text-indigo-600 hover:underline transition-colors">
-          Terms & Privacy
-        </button>
+        <div className="flex items-center justify-center gap-4">
+          {!isPro && (
+            <a
+              href={WHOP_UPGRADE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-indigo-600 hover:underline transition-colors"
+            >
+              Upgrade to Pro
+            </a>
+          )}
+          <button onClick={() => setShowPrivacy(true)} className="hover:text-indigo-600 hover:underline transition-colors">
+            Terms & Privacy
+          </button>
+        </div>
       </footer>
 
       {/* Privacy Modal */}
