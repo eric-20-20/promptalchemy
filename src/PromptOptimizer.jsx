@@ -181,6 +181,7 @@ const parseTemplateVariables = (text) => {
   return Array.from(vars.values());
 };
 
+
 const compileTemplate = (text, values) => {
   let compiled = text || '';
   const variables = parseTemplateVariables(text);
@@ -190,6 +191,28 @@ const compileTemplate = (text, values) => {
     compiled = compiled.split(v.rawToken).join(val);
   });
   return compiled;
+};
+
+// Safely format timestamps stored in history (supports Date.now(), ISO strings, or preformatted strings)
+const formatTime = (ts) => {
+  if (!ts) return '';
+  if (typeof ts === 'string') {
+    const parsed = Date.parse(ts);
+    if (Number.isNaN(parsed)) return ts;
+    try {
+      return new Date(parsed).toLocaleString();
+    } catch {
+      return ts;
+    }
+  }
+  if (typeof ts === 'number') {
+    try {
+      return new Date(ts).toLocaleString();
+    } catch {
+      return String(ts);
+    }
+  }
+  return String(ts);
 };
 
 const PRICE_PER_1M_INPUT = 5.00;
@@ -302,6 +325,74 @@ export default function PromptOptimizer() {
       }
     }
   }, [editorContent, activeView]);
+
+  // --- Import / Export Blueprints ---
+  const exportBlueprints = () => {
+    try {
+      const custom = blueprints.filter(b => b && !b.isSystem);
+      const payload = JSON.stringify(custom, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'promptalchemy_blueprints.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Failed to export blueprints.');
+      console.error(e);
+    }
+  };
+
+  const importBlueprints = async (event) => {
+    try {
+      const file = event?.target?.files?.[0];
+      if (!file) return;
+
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) {
+        alert('Invalid file: expected an array of blueprints.');
+        return;
+      }
+
+      // Validate and sanitize incoming blueprints
+      const imported = parsed
+        .filter(b => b && typeof b === 'object' && b.name && b.content)
+        .map(b => ({
+          id: b.id && typeof b.id === 'string' ? b.id : `imported-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: String(b.name).slice(0, 80),
+          content: String(b.content),
+          isSystem: false,
+          lastModified: Date.now(),
+          versions: Array.isArray(b.versions) ? b.versions.slice(0, 5) : []
+        }));
+
+      if (imported.length === 0) {
+        alert('No valid blueprints found in that file.');
+        return;
+      }
+
+      // Merge with existing custom blueprints by id (import wins)
+      const existingCustom = blueprints.filter(b => b && !b.isSystem);
+      const map = new Map(existingCustom.map(b => [b.id, b]));
+      imported.forEach(b => map.set(b.id, b));
+      const mergedCustom = Array.from(map.values());
+
+      localStorage.setItem('myBlueprints', JSON.stringify(mergedCustom));
+      setBlueprints([...DEFAULT_BLUEPRINTS, ...mergedCustom]);
+      setRightPanelTab('templates');
+      alert(`Imported ${imported.length} blueprint${imported.length === 1 ? '' : 's'}.`);
+    } catch (e) {
+      alert('Failed to import blueprints. Make sure this is a valid JSON export.');
+      console.error(e);
+    } finally {
+      // Allow importing the same file again
+      if (event?.target) event.target.value = '';
+    }
+  };
 
   // --- Actions ---
   const saveBlueprint = () => {
@@ -723,11 +814,15 @@ export default function PromptOptimizer() {
                     <History className="w-8 h-8 mx-auto mb-2 opacity-20" />
                     <p className="text-xs">No history yet.</p>
                   </div>
-                ) : history.map((item) => (
-                  <div key={item.id} onClick={() => {setResultData({prompt: item.output, notes: []}); setRightPanelTab('output'); setSelectedModel(MODELS.find(m => m.id === item.modelId)||MODELS[0])}} className="bg-white p-3 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md cursor-pointer transition-all">
+                ) : history.filter(item => item && typeof item === 'object').map((item) => (
+                  <div key={item.id} onClick={() => {
+                    setResultData({ prompt: item.output || '', notes: [] });
+                    setRightPanelTab('output');
+                    setSelectedModel(MODELS.find(m => m.id === item.modelId) || MODELS[0]);
+                  }} className="bg-white p-3 rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md cursor-pointer transition-all">
                      <div className="flex items-center justify-between mb-2">
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${getModelColor(item.modelId).split(' ')[0]}`}>{MODELS.find(m => m.id === item.modelId)?.name.split(' ')[0]}</span>
-                        <span className="text-[10px] text-gray-400">{formatTime(item.timestamp)}</span>
+                        <span className="text-[10px] text-gray-400">{formatTime(item.timestamp || item.time || item.createdAt)}</span>
                      </div>
                      <div className="text-[10px] text-gray-400 line-clamp-2 italic">"{item.input ? item.input.substring(0, 60) : ''}..."</div>
                   </div>
