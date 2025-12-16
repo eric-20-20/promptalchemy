@@ -215,8 +215,30 @@ const formatTime = (ts) => {
   return String(ts);
 };
 
+
 const PRICE_PER_1M_INPUT = 5.00;
 const PRICE_PER_1M_OUTPUT = 15.00;
+
+// --- Storage helpers (per-user namespace) ---
+const getOrCreateUserNamespace = () => {
+  try {
+    const key = 'pa_user_namespace_v1';
+    let ns = localStorage.getItem(key);
+    if (!ns) {
+      ns = (globalThis.crypto?.randomUUID?.() || `ns-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+      localStorage.setItem(key, ns);
+    }
+    return ns;
+  } catch {
+    // If storage is blocked, fall back to a non-persistent namespace
+    return `ns-${Date.now()}`;
+  }
+};
+
+const storageKey = (baseKey) => {
+  const ns = getOrCreateUserNamespace();
+  return `${baseKey}__${ns}`;
+};
 
 const VariableInput = ({ variable, value, onChange }) => {
   const commonClass = "w-full p-2.5 rounded-lg border border-gray-200 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all";
@@ -279,7 +301,7 @@ export default function PromptOptimizer() {
   // --- Effects ---
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('myBlueprints');
+      const saved = localStorage.getItem(storageKey('myBlueprints'));
       if (saved) {
         const custom = JSON.parse(saved);
         if (Array.isArray(custom)) {
@@ -287,15 +309,15 @@ export default function PromptOptimizer() {
           setBlueprints([...DEFAULT_BLUEPRINTS, ...validCustom]);
         }
       }
-    } catch (e) { localStorage.removeItem('myBlueprints'); }
+    } catch (e) { localStorage.removeItem(storageKey('myBlueprints')); }
 
     try {
-      const savedHist = localStorage.getItem('promptHistory');
+      const savedHist = localStorage.getItem(storageKey('promptHistory'));
       if (savedHist) {
         const parsedHist = JSON.parse(savedHist);
         if (Array.isArray(parsedHist)) setHistory(parsedHist);
       }
-    } catch (e) { localStorage.removeItem('promptHistory'); }
+    } catch (e) { localStorage.removeItem(storageKey('promptHistory')); }
   }, []);
 
   // --- Cost Estimation ---
@@ -381,7 +403,7 @@ export default function PromptOptimizer() {
       imported.forEach(b => map.set(b.id, b));
       const mergedCustom = Array.from(map.values());
 
-      localStorage.setItem('myBlueprints', JSON.stringify(mergedCustom));
+      localStorage.setItem(storageKey('myBlueprints'), JSON.stringify(mergedCustom));
       setBlueprints([...DEFAULT_BLUEPRINTS, ...mergedCustom]);
       setRightPanelTab('templates');
       alert(`Imported ${imported.length} blueprint${imported.length === 1 ? '' : 's'}.`);
@@ -407,7 +429,7 @@ export default function PromptOptimizer() {
     const newBlueprint = { id: editorId || `custom-${Date.now()}`, name: editorName, content: editorContent, isSystem: false, lastModified: Date.now(), versions: previousVersions };
     const customBlueprints = blueprints.filter(b => !b.isSystem && b.id !== newBlueprint.id);
     const updatedCustom = [...customBlueprints, newBlueprint];
-    localStorage.setItem('myBlueprints', JSON.stringify(updatedCustom));
+    localStorage.setItem(storageKey('myBlueprints'), JSON.stringify(updatedCustom));
     setBlueprints([...DEFAULT_BLUEPRINTS, ...updatedCustom]);
     setActiveBlueprintId(newBlueprint.id);
     setActiveView('run');
@@ -425,7 +447,7 @@ export default function PromptOptimizer() {
     if (e) e.stopPropagation(); 
     if (confirm("Delete this blueprint? This cannot be undone.")) {
       const customBlueprints = blueprints.filter(b => !b.isSystem && b.id !== id);
-      localStorage.setItem('myBlueprints', JSON.stringify(customBlueprints));
+      localStorage.setItem(storageKey('myBlueprints'), JSON.stringify(customBlueprints));
       setBlueprints([...DEFAULT_BLUEPRINTS, ...customBlueprints]);
       if (activeBlueprintId === id) setActiveBlueprintId(DEFAULT_BLUEPRINTS[0].id);
     }
@@ -438,7 +460,7 @@ export default function PromptOptimizer() {
     const newBp = { ...bp, id: newId, name: newName, isSystem: false, lastModified: Date.now(), versions: [] };
     const customBlueprints = blueprints.filter(b => !b.isSystem);
     const updatedCustom = [...customBlueprints, newBp];
-    localStorage.setItem('myBlueprints', JSON.stringify(updatedCustom));
+    localStorage.setItem(storageKey('myBlueprints'), JSON.stringify(updatedCustom));
     setBlueprints([...DEFAULT_BLUEPRINTS, ...updatedCustom]);
     setEditorId(newId);
     setEditorName(newName);
@@ -530,7 +552,7 @@ export default function PromptOptimizer() {
       };
       setHistory(prev => {
         const updated = [newItem, ...prev].slice(0, 10);
-        localStorage.setItem('promptHistory', JSON.stringify(updated));
+        localStorage.setItem(storageKey('promptHistory'), JSON.stringify(updated));
         return updated;
       });
 
@@ -807,7 +829,7 @@ export default function PromptOptimizer() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-bold text-gray-400 uppercase">Recent Generations</span>
-                  {history.length > 0 && <button onClick={() => {setHistory([]); localStorage.removeItem('promptHistory');}} className="text-[10px] text-red-500 hover:underline">Clear All</button>}
+                  {history.length > 0 && <button onClick={() => {setHistory([]); localStorage.removeItem(storageKey('promptHistory'));}} className="text-[10px] text-red-500 hover:underline">Clear All</button>}
                 </div>
                 {history.length === 0 ? (
                   <div className="text-center py-12 text-gray-300">
