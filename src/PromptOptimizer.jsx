@@ -158,10 +158,9 @@ const isProUserFromUrl = () => {
 // Free plan limits (simple MVP gating)
 const FREE_RUN_LIMIT = 5;
 const FREE_BLUEPRINT_LIMIT = 3;
-const PRO_ONLY_MODELS = ['claude', 'o1', 'grok'];
 
 // Replace this with your Whop product URL
-const WHOP_UPGRADE_URL = 'https://whop.com/';
+const WHOP_UPGRADE_URL = 'https://whop.com/checkout/plan_VLoz93g8o1wEf';
 
 // --- 4. HELPERS ---
 const parseTemplateVariables = (text) => {
@@ -526,14 +525,7 @@ export default function PromptOptimizer() {
       // Limit free generations using local history count
       if ((history?.length || 0) >= FREE_RUN_LIMIT) {
         setIsGenerating(false);
-        alert(`Free plan limit reached (${FREE_RUN_LIMIT} generations). Upgrade to Pro for unlimited prompts.`);
-        return;
-      }
-
-      // Lock Pro-only models
-      if (PRO_ONLY_MODELS.includes(selectedModel.id)) {
-        setIsGenerating(false);
-        alert('That target model is available on the Pro plan.');
+        alert(`Free plan limit reached (${FREE_RUN_LIMIT} generations). Upgrade to Pro for more generations.`);
         return;
       }
     }
