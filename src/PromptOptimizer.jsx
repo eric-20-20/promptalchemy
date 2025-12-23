@@ -17,6 +17,8 @@ const MODELS = [
     icon: <Bot className="w-5 h-5 text-orange-600" />,
     shortRule: 'XML tags + prefill style',
     description: 'XML-native. Complex reasoning.',
+    bestFor: 'Complex reasoning + structure',
+    badge: 'Reasoning',
     color: 'bg-orange-50 border-orange-200 text-orange-900',
     metaRules: `1. Structure request with XML tags (<instruction>, <context>).
 2. Ask for "step-by-step" thinking inside <thinking> tags.
@@ -28,6 +30,8 @@ const MODELS = [
     icon: <BrainCircuit className="w-5 h-5 text-pink-600" />,
     shortRule: 'No CoT + constraints only',
     description: 'Reasoning specialist. No CoT prompts.',
+    bestFor: 'Tight constraints + edge cases',
+    badge: 'Planner',
     color: 'bg-pink-50 border-pink-200 text-pink-900',
     metaRules: `1. DO NOT ask for "Chain of Thought" or "step-by-step" (model does this natively).
 2. Focus purely on the end constraint and edge cases.
@@ -39,6 +43,8 @@ const MODELS = [
     icon: <Zap className="w-5 h-5 text-green-600" />,
     shortRule: 'Markdown + Persona',
     description: 'Markdown master. Generalist.',
+    bestFor: 'General purpose + formatting',
+    badge: 'Generalist',
     color: 'bg-green-50 border-green-200 text-green-900',
     metaRules: `1. Assign a specific high-level Expert Persona.
 2. Use Markdown headers (###) for structure.
@@ -50,6 +56,8 @@ const MODELS = [
     icon: <Sparkles className="w-5 h-5 text-blue-600" />,
     shortRule: 'Direct + numbered lists',
     description: 'Massive context window.',
+    bestFor: 'Long context + citations',
+    badge: 'Long context',
     color: 'bg-blue-50 border-blue-200 text-blue-900',
     metaRules: `1. Be extremely direct and concise.
 2. If task is complex, break into numbered sub-tasks.
@@ -61,6 +69,8 @@ const MODELS = [
     icon: <Code2 className="w-5 h-5 text-purple-600" />,
     shortRule: 'Strict Instruction/Response',
     description: 'Strict instruction follower.',
+    bestFor: 'Strict instruction following',
+    badge: 'Strict',
     color: 'bg-purple-50 border-purple-200 text-purple-900',
     metaRules: `1. Use strict [Instruction]...[Response] structure.
 2. Be highly imperative ("Return ONLY code").
@@ -72,6 +82,8 @@ const MODELS = [
     icon: <Wind className="w-5 h-5 text-sky-600" />,
     shortRule: 'No conversational filler',
     description: 'Concise & efficient.',
+    bestFor: 'Fast + concise outputs',
+    badge: 'Concise',
     color: 'bg-sky-50 border-sky-200 text-sky-900',
     metaRules: `1. Remove all conversational filler ("Sure, I can help").
 2. Focus on density of information.
@@ -83,6 +95,8 @@ const MODELS = [
     icon: <Rocket className="w-5 h-5 text-slate-800" />,
     shortRule: 'Casual tone allowed',
     description: 'Witty & uninhibited.',
+    bestFor: 'Casual + witty tone',
+    badge: 'Witty',
     color: 'bg-slate-100 border-slate-300 text-slate-900',
     metaRules: `1. Allow for more casual/witty tone if requested.
 2. Relax standard safety/tone filters slightly.
@@ -94,6 +108,8 @@ const MODELS = [
     icon: <Aperture className="w-5 h-5 text-indigo-600" />,
     shortRule: 'Parameters + keyword list',
     description: 'Image generation parameters.',
+    bestFor: 'Image prompt parameters',
+    badge: 'Image',
     color: 'bg-indigo-50 border-indigo-200 text-indigo-900',
     metaRules: `1. Output MUST be a single prompt string.
 2. Use comma-separated keywords, not sentences.
@@ -104,12 +120,12 @@ const MODELS = [
 
 // --- 2. DATA: FLAVORS ---
 const FLAVORS = [
-  { id: 'neutral', name: 'Neutral', rule: '' },
-  { id: 'professional', name: 'Professional', rule: 'Adopt a professional, corporate tone. Use industry-standard terminology. Be diplomatic and structured.' },
-  { id: 'socratic', name: 'Teacher', rule: 'Adopt a Socratic teaching style. Ask guiding questions. Break down complex concepts into fundamental principles. Be encouraging but rigorous.' },
-  { id: 'eli5', name: 'Simple', rule: 'Explain Like I\'m 5. Use simple analogies, avoid jargon, and keep sentences short and clear.' },
-  { id: 'hacker', name: 'Coder', rule: 'Adopt a terse, technical, and slightly witty tone. Focus on efficiency and clever solutions. Use tech slang appropriately.' },
-  { id: 'storyteller', name: 'Creative', rule: 'Focus on narrative flow, sensory details, and "showing not telling".' }
+  { id: 'neutral', name: 'Neutral', emoji: '🧊', desc: 'Balanced, no bias', rule: '' },
+  { id: 'professional', name: 'Professional', emoji: '💼', desc: 'Clear, structured, business tone', rule: 'Adopt a professional, corporate tone. Use industry-standard terminology. Be diplomatic and structured.' },
+  { id: 'socratic', name: 'Teacher', emoji: '🧠', desc: 'Guided, step-by-step thinking', rule: 'Adopt a Socratic teaching style. Ask guiding questions. Break down complex concepts into fundamental principles. Be encouraging but rigorous.' },
+  { id: 'eli5', name: 'Simple', emoji: '🍼', desc: 'Plain language + analogies', rule: 'Explain Like I\'m 5. Use simple analogies, avoid jargon, and keep sentences short and clear.' },
+  { id: 'hacker', name: 'Coder', emoji: '⚡', desc: 'Terse, technical, efficient', rule: 'Adopt a terse, technical, and slightly witty tone. Focus on efficiency and clever solutions. Use tech slang appropriately.' },
+  { id: 'storyteller', name: 'Creative', emoji: '🎨', desc: 'Narrative flow + sensory detail', rule: 'Focus on narrative flow, sensory details, and "showing not telling".' }
 ];
 
 // --- 3. DATA: DEFAULT BLUEPRINTS ---
@@ -161,6 +177,41 @@ const FREE_BLUEPRINT_LIMIT = 3;
 
 // Replace this with your Whop product URL
 const WHOP_UPGRADE_URL = 'https://whop.com/checkout/plan_VLoz93g8o1wEf';
+
+const QUICK_START = {
+  claude: [
+    'Design a robust API error-handling strategy for a React app.',
+    'Rewrite this prompt into a structured XML request for Claude.'
+  ],
+  o1: [
+    'Given these constraints, propose the safest approach and edge cases.',
+    'Turn this vague request into a precise specification and acceptance tests.'
+  ],
+  gpt4: [
+    'Write a polished LinkedIn post announcing a new product feature.',
+    'Generate a structured technical plan with headings and bullet points.'
+  ],
+  gemini: [
+    'Summarize these notes and list action items with citations.',
+    'Draft a research plan and specify sources to consult.'
+  ],
+  llama: [
+    'Return ONLY code: write a Python script to parse a CSV and validate fields.',
+    'Convert this into a strict Instruction/Response format.'
+  ],
+  mistral: [
+    'Condense this into a dense checklist with zero filler.',
+    'Return JSON: extract entities and key decisions from this text.'
+  ],
+  grok: [
+    'Write a witty, concise product launch announcement.',
+    'Give a casual breakdown of pros/cons with a punchy tone.'
+  ],
+  midjourney: [
+    'Futuristic abstract unicorn, neon rainbow sky, halftone ink, --ar 16:9 --v 6',
+    'Cinematic street portrait, shallow DOF, film grain, rim light, --ar 2:3 --stylize 300'
+  ]
+};
 
 // --- 4. HELPERS ---
 const parseTemplateVariables = (text) => {
@@ -316,10 +367,24 @@ export default function PromptOptimizer() {
   const [lastInputUsed, setLastInputUsed] = useState('');
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  // --- Feature toggles ---
+  const [enableClarify, setEnableClarify] = useState(true);
+  const [enableSelfCheck, setEnableSelfCheck] = useState(true);
 
   // --- Effects ---
   useEffect(() => {
     setIsPro(isProUserFromUrl());
+    // Load feature toggles from localStorage
+    try {
+      const savedSettings = localStorage.getItem(storageKey('pa_settings'));
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (typeof parsed?.enableClarify === 'boolean') setEnableClarify(parsed.enableClarify);
+        if (typeof parsed?.enableSelfCheck === 'boolean') setEnableSelfCheck(parsed.enableSelfCheck);
+      }
+    } catch (e) {
+      // ignore
+    }
     try {
       const saved = localStorage.getItem(storageKey('myBlueprints'));
       if (saved) {
@@ -339,6 +404,18 @@ export default function PromptOptimizer() {
       }
     } catch (e) { localStorage.removeItem(storageKey('promptHistory')); }
   }, []);
+
+  // Persist feature toggles whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        storageKey('pa_settings'),
+        JSON.stringify({ enableClarify, enableSelfCheck })
+      );
+    } catch {
+      // ignore
+    }
+  }, [enableClarify, enableSelfCheck]);
 
   // --- Cost Estimation ---
   const costEstimate = useMemo(() => {
@@ -501,6 +578,37 @@ export default function PromptOptimizer() {
     setSelectedModel(MODELS.find(m => m.id === 'gpt4') || MODELS[0]);
   };
 
+  // --- Helper: Parse JSON loosely (strips markdown, tolerant to minor errors) ---
+  const parseJsonLoose = (raw) => {
+    if (!raw || typeof raw !== 'string') return null;
+    try {
+      const clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(clean);
+    } catch {
+      return null;
+    }
+  };
+
+  // --- Helper: Call optimizer API ---
+  const callOptimizerApi = async ({ systemInstruction, userPrompt, stage = 'optimize', model = 'gpt-4o' }) => {
+    const response = await fetch('/api/optimize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stage,
+        model,
+        systemInstruction,
+        userPrompt
+      })
+    });
+
+    const data = await response.json();
+    if (data?.error) throw new Error(data.error || 'API Error');
+
+    const rawContent = data?.choices?.[0]?.message?.content || '';
+    return { data, rawContent };
+  };
+
   const handleGenerate = async () => {
     setError(null);
     setIsGenerating(true);
@@ -529,7 +637,37 @@ export default function PromptOptimizer() {
         return;
       }
     }
-    setLastInputUsed(finalUserPrompt);
+    let workingPrompt = finalUserPrompt;
+
+    // (1) Optional: Clarify intent (silent) to reduce vague prompts
+    if (enableClarify) {
+      const clarifyInstruction = `You are a prompt clarifier. Your job is to rewrite the user's request to be maximally explicit about goal, audience, constraints, and output format.
+
+RULES:
+- Do NOT add new requirements that aren't implied.
+- Do NOT answer the user's request.
+- If details are missing, make conservative assumptions and keep them generic.
+
+RESPONSE FORMAT:
+Return a valid JSON object with:
+1) "clarified_prompt": string
+2) "assumptions": array of 0-3 short strings
+
+IMPORTANT: Return raw JSON only. No markdown.`;
+
+      try {
+        const { rawContent } = await callOptimizerApi({ systemInstruction: clarifyInstruction, userPrompt: workingPrompt, stage: 'clarify' });
+        const parsed = parseJsonLoose(rawContent);
+        if (parsed?.clarified_prompt && typeof parsed.clarified_prompt === 'string') {
+          workingPrompt = parsed.clarified_prompt.trim();
+        }
+      } catch (e) {
+        // If clarify fails, just continue with original prompt
+        console.warn('Clarify step failed:', e);
+      }
+    }
+
+    setLastInputUsed(workingPrompt);
 
     const flavorRule = selectedFlavor.id !== 'neutral' ? `\nSTYLE/TONE OVERRIDE:\n${selectedFlavor.rule}` : "";
     let guardrails = "";
@@ -539,53 +677,87 @@ export default function PromptOptimizer() {
     else guardrails += "\nLENGTH: Balanced.";
 
     const systemInstruction = `You are an expert Prompt Engineer specializing in ${selectedModel.name}.
-    OBJECTIVE: Rewrite the user's request into the PERFECT prompt for ${selectedModel.name}.
-    STRICT MODEL ARCHITECTURE RULES:\n${selectedModel.metaRules}\n${flavorRule}\n${guardrails}
-    
-    RESPONSE FORMAT:
-    Return a valid JSON object with:
-    1. "optimized_prompt": The final prompt string.
-    2. "analysis_notes": An array of 1-3 short bullet point strings explaining changes.
-    
-    IMPORTANT: Do not return markdown code blocks. Just the raw JSON.`;
+OBJECTIVE: Rewrite the user's request into the PERFECT prompt for ${selectedModel.name}.
+
+DETOX RULES:
+- Remove conflicting or redundant instructions.
+- Ensure output format is unambiguous.
+- Keep constraints consistent and enforceable.
+
+STRICT MODEL ARCHITECTURE RULES:\n${selectedModel.metaRules}\n${flavorRule}\n${guardrails}
+
+OUTPUT CONTRACT (always include in the final prompt):
+- Specify the required output format (bullets/JSON/sections/etc.)
+- Specify desired length
+- Specify how to handle missing info (ask up to 2 clarifying questions only if required)
+
+RESPONSE FORMAT:
+Return a valid JSON object with:
+1) "optimized_prompt": The final prompt string.
+2) "analysis_notes": An array of 1-3 short bullet point strings explaining changes.
+
+IMPORTANT: Do not return markdown code blocks. Just the raw JSON.`;
 
     try {
-      const response = await fetch('/api/optimize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          systemInstruction: systemInstruction,
-          userPrompt: finalUserPrompt
-        })
-      });
+      // (2) Optimize
+      const { rawContent } = await callOptimizerApi({ systemInstruction, userPrompt: workingPrompt, stage: 'optimize' });
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error || 'API Error');
-      
-      let parsedResult;
-      const rawContent = data.choices[0].message.content;
-      try {
-        const cleanContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-        parsedResult = JSON.parse(cleanContent);
-      } catch (e) {
-        parsedResult = { optimized_prompt: rawContent, analysis_notes: ["Optimization completed."] };
+      let parsedResult = parseJsonLoose(rawContent);
+      if (!parsedResult) {
+        parsedResult = { optimized_prompt: rawContent, analysis_notes: ['Optimization completed.'] };
+      }
+
+      let finalOptimizedPrompt = parsedResult.optimized_prompt;
+      let finalNotes = Array.isArray(parsedResult.analysis_notes) ? parsedResult.analysis_notes : [];
+
+      // (3) Optional: Self-check + refine
+      if (enableSelfCheck && typeof finalOptimizedPrompt === 'string' && finalOptimizedPrompt.trim()) {
+        const judgeInstruction = `You are a strict prompt quality reviewer.
+
+TASK:
+- Evaluate the candidate prompt for clarity, specificity, constraint consistency, and alignment to the target model.
+- If score < 8, rewrite the prompt to improve it.
+
+TARGET MODEL: ${selectedModel.name}
+MODEL RULES:\n${selectedModel.metaRules}
+
+RESPONSE FORMAT:
+Return raw JSON only:
+1) "score" (number 1-10)
+2) "final_prompt" (string)
+3) "fixes" (array of 0-3 short strings)
+
+IMPORTANT: No markdown.`;
+
+        try {
+          const { rawContent: judgeRaw } = await callOptimizerApi({ systemInstruction: judgeInstruction, userPrompt: finalOptimizedPrompt, stage: 'judge' });
+          const judged = parseJsonLoose(judgeRaw);
+          if (judged?.final_prompt && typeof judged.final_prompt === 'string') {
+            finalOptimizedPrompt = judged.final_prompt;
+          }
+          if (Array.isArray(judged?.fixes) && judged.fixes.length) {
+            finalNotes = [...finalNotes, ...judged.fixes].slice(0, 5);
+          }
+        } catch (e) {
+          console.warn('Self-check step failed:', e);
+        }
       }
 
       setResultData({
-        prompt: parsedResult.optimized_prompt,
-        notes: parsedResult.analysis_notes || []
+        prompt: finalOptimizedPrompt,
+        notes: finalNotes
       });
       setResultTab('optimized');
-      
+
       const newItem = {
         id: Date.now(),
         modelId: selectedModel.id,
         type: activeBlueprintId === 'free' ? 'Free Input' : activeBP?.name || 'Blueprint',
-        input: finalUserPrompt,
-        output: parsedResult.optimized_prompt,
-        timestamp: new Date().toLocaleString()
+        input: workingPrompt,
+        output: finalOptimizedPrompt,
+        timestamp: Date.now()
       };
+
       setHistory(prev => {
         const updated = [newItem, ...prev].slice(0, 10);
         localStorage.setItem(storageKey('promptHistory'), JSON.stringify(updated));
@@ -593,7 +765,7 @@ export default function PromptOptimizer() {
       });
 
     } catch (error) {
-      setError(error.message || "An unexpected error occurred.");
+      setError(error.message || 'An unexpected error occurred.');
     } finally {
       setIsGenerating(false);
     }
@@ -622,6 +794,20 @@ export default function PromptOptimizer() {
     const m = MODELS.find(mod => mod.id === id);
     return m ? m.color : 'bg-gray-100 border-gray-200 text-gray-500';
   };
+
+  // --- UI helpers (polish pass) ---
+  const SectionLabel = ({ children, right }) => (
+    <div className="flex items-center justify-between mb-2">
+      <div className="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">
+        {children}
+      </div>
+      {right}
+    </div>
+  );
+
+  const Card = ({ className = '', children }) => (
+    <div className={`bg-white rounded-2xl border border-gray-200 shadow-sm ${className}`}>{children}</div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 text-slate-800 font-sans flex flex-col overflow-hidden">
@@ -659,47 +845,71 @@ export default function PromptOptimizer() {
       <main className="flex-1 max-w-screen-2xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden h-full">
         
         {/* LEFT PANEL: CONFIG & INPUT */}
-        <div className="flex flex-col h-full border-r border-gray-200 bg-gray-50/50 overflow-y-auto p-4 lg:p-6 gap-6">
+        <div className="flex flex-col h-full border-r border-gray-200 bg-gray-50/50 overflow-y-auto p-5 lg:p-7 gap-6">
           
           {/* 1. Model & Flavor Configuration */}
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+          <Card className="p-5 space-y-4">
             <div className="flex flex-col xl:flex-row gap-4">
               <div className="flex-1">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Target Model</label>
+                <SectionLabel>Target model</SectionLabel>
                 <div className="grid grid-cols-2 gap-2">
                   {MODELS.map((model) => (
-                    <button key={model.id} onClick={() => setSelectedModel(model)} className={`text-left p-2 rounded-lg border transition-all text-xs flex flex-col justify-between h-20 ${selectedModel.id === model.id ? `${model.color} border-current ring-1 ring-current` : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300'}`}>
-                      <div className="flex justify-between w-full">{model.icon}{selectedModel.id === model.id && <Check className="w-3 h-3 opacity-60" />}</div>
-                      <div>
-                        <span className="font-semibold block">{model.name}</span>
-                        <span className="text-[9px] opacity-75 leading-tight line-clamp-1">{model.description}</span>
+                    <button
+                      key={model.id}
+                      onClick={() => setSelectedModel(model)}
+                      className={`relative text-left p-3 rounded-xl border transition-all text-xs flex flex-col justify-between h-24 overflow-hidden ${selectedModel.id === model.id ? `${model.color} border-current ring-2 ring-indigo-400 shadow-lg shadow-indigo-100 scale-[1.01]` : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300 hover:shadow-sm'}`}
+                    >
+                      <div className="flex justify-between w-full items-start">
+                        <div className="flex items-center gap-2">
+                          {model.icon}
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/70 border border-white/40 text-gray-700">
+                            {model.badge}
+                          </span>
+                        </div>
+                        {selectedModel.id === model.id && <Check className="w-4 h-4 opacity-70" />}
+                      </div>
+                      <div className="space-y-1">
+                        <span className="font-semibold block text-sm leading-tight">{model.name}</span>
+                        <span className="text-[10px] opacity-80 leading-tight line-clamp-1">{model.bestFor}</span>
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
               <div className="xl:w-1/3">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block flex items-center gap-1">Vibe <Sparkles className="w-3 h-3 text-yellow-500" /></label>
-                <div className="space-y-1">
+                <SectionLabel right={<div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500"><Sparkles className="w-3 h-3 text-yellow-500" />Vibe</div>}>
+                  Style
+                </SectionLabel>
+                <div className="flex flex-wrap gap-2">
                   {FLAVORS.map(flavor => (
-                    <button key={flavor.id} onClick={() => setSelectedFlavor(flavor)} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex justify-between items-center transition-all ${selectedFlavor.id === flavor.id ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-                      {flavor.name}{selectedFlavor.id === flavor.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
+                    <button
+                      key={flavor.id}
+                      onClick={() => setSelectedFlavor(flavor)}
+                      className={`px-3 py-2 rounded-full text-xs font-semibold border transition-all flex items-center gap-2 ${selectedFlavor.id === flavor.id ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'}`}
+                      title={flavor.desc}
+                    >
+                      <span className="text-sm leading-none">{flavor.emoji}</span>
+                      <span>{flavor.name}</span>
                     </button>
                   ))}
                 </div>
+                <div className="mt-3 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <span className="font-semibold text-gray-700">{selectedFlavor.emoji} {selectedFlavor.name}:</span>{' '}
+                  <span>{selectedFlavor.desc}</span>
+                </div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* 2. Active Context Bar */}
-          <div className="flex items-center gap-2 text-xs px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-indigo-700">
+          <div className="flex items-center gap-2 text-[12px] px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-700">
             <Info className="w-3.5 h-3.5" />
             <span className="font-semibold">Optimizing for {selectedModel.name}:</span>
             <span className="opacity-80">{selectedModel.shortRule}</span>
           </div>
 
           {/* 3. Input Workspace */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col flex-1 min-h-[400px]">
+          <Card className="flex flex-col flex-1 min-h-[420px]">
             {activeView === 'edit' ? (
               // BLUEPRINT EDITOR VIEW
               <div className="flex-1 p-6 flex flex-col gap-4">
@@ -736,17 +946,96 @@ export default function PromptOptimizer() {
             ) : (
               // GENERATOR INPUT VIEW
               <>
-                <div className="flex border-b border-gray-100 bg-gray-50/50 px-2 pt-2 gap-1 overflow-x-auto scrollbar-hide flex-shrink-0">
-                   <button onClick={() => setActiveBlueprintId('free')} className={`px-4 py-2 text-xs font-medium rounded-t-lg border-t border-x transition-all whitespace-nowrap ${activeBlueprintId === 'free' ? 'bg-white border-gray-200 border-b-white text-indigo-600' : 'bg-transparent border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}><MessageSquare className="w-3.5 h-3.5 inline mr-1.5" /> Free Input</button>
-                   {blueprints.map(bp => (
-                     <div key={bp.id} className={`group flex items-center rounded-t-lg border-t border-x transition-all whitespace-nowrap ${activeBlueprintId === bp.id ? 'bg-white border-gray-200 border-b-white z-10' : 'bg-transparent border-transparent hover:bg-gray-100'}`}>
-                        <button onClick={() => setActiveBlueprintId(bp.id)} className={`px-4 py-2 text-xs font-medium flex items-center gap-1.5 ${activeBlueprintId === bp.id ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>
-                          {bp.isSystem ? (bp.icon || <LayoutTemplate className="w-3 h-3" />) : <Settings2 className="w-3 h-3" />}
-                          {bp.name}
-                        </button>
-                     </div>
-                   ))}
-                   <button onClick={() => { setEditorId(null); setEditorName(''); setEditorContent('My Template:\n\n{{input1}}'); setActiveView('edit'); }} className="px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 rounded-t-lg transition-colors flex items-center gap-1 ml-1"><Plus className="w-3 h-3" /> New</button>
+                <div className="px-6 pt-5 pb-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-gray-700">
+                      <span className="px-2 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">1</span>
+                      <span>Choose model</span>
+                      <ChevronRight className="w-3 h-3 text-gray-300" />
+                      <span className="px-2 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">2</span>
+                      <span>Describe task</span>
+                      <ChevronRight className="w-3 h-3 text-gray-300" />
+                      <span className="px-2 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">3</span>
+                      <span>Generate</span>
+                    </div>
+                    <button
+                      onClick={loadExample}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 hover:underline"
+                    >
+                      Load example
+                    </button>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(QUICK_START[selectedModel.id] || []).map((ex, idx) => (
+                      <button
+                        key={`${selectedModel.id}-ex-${idx}`}
+                        onClick={() => {
+                          setActiveBlueprintId('free');
+                          setFreeInput(ex);
+                        }}
+                        className="px-3 py-2 rounded-lg text-[11px] bg-white border border-gray-200 hover:border-indigo-300 hover:shadow-sm text-gray-700 transition-all"
+                        title={ex}
+                      >
+                        {ex}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="px-6 pb-3">
+                  <div className="bg-gray-100 border border-gray-200 rounded-2xl p-1 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+                    <button
+                      onClick={() => setActiveBlueprintId('free')}
+                      className={`px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2 ${
+                        activeBlueprintId === 'free'
+                          ? 'bg-white text-indigo-700 shadow-sm border border-gray-200'
+                          : 'text-gray-600 hover:text-gray-800 hover:bg-white/60'
+                      }`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      Free Input
+                    </button>
+
+                    {blueprints.map((bp) => (
+                      <button
+                        key={bp.id}
+                        onClick={() => setActiveBlueprintId(bp.id)}
+                        className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all whitespace-nowrap flex items-center gap-2 ${
+                          activeBlueprintId === bp.id
+                            ? 'bg-white text-indigo-700 shadow-sm border border-gray-200'
+                            : 'text-gray-600 hover:text-gray-800 hover:bg-white/60'
+                        }`}
+                        title={bp.isSystem ? 'System template' : 'Custom template'}
+                      >
+                        {bp.isSystem ? (bp.icon || <LayoutTemplate className="w-3.5 h-3.5" />) : <Settings2 className="w-3.5 h-3.5" />}
+                        <span className="truncate max-w-[180px]">{bp.name}</span>
+                        {bp.isSystem ? (
+                          <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600">
+                            SYS
+                          </span>
+                        ) : (
+                          <span className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">
+                            YOU
+                          </span>
+                        )}
+                      </button>
+                    ))}
+
+                    <div className="flex-1" />
+
+                    <button
+                      onClick={() => {
+                        setEditorId(null);
+                        setEditorName('');
+                        setEditorContent('My Template:\n\n{{input1}}');
+                        setActiveView('edit');
+                      }}
+                      className="px-4 py-2 text-xs font-bold rounded-xl whitespace-nowrap flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                      title="Create a new template"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      New
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="flex-1 flex flex-col p-6 gap-6 overflow-y-auto">
@@ -777,6 +1066,20 @@ export default function PromptOptimizer() {
                       <button onClick={() => setPiiProtection(!piiProtection)} className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition-all ${piiProtection ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
                         <Shield className="w-3 h-3" /> {piiProtection ? 'PII Safe' : 'PII Off'}
                       </button>
+                      <button
+                        onClick={() => setEnableClarify(!enableClarify)}
+                        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition-all ${enableClarify ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                        title="Silently clarifies vague prompts before optimizing"
+                      >
+                        <ArrowLeftRight className="w-3 h-3" /> {enableClarify ? 'Clarify On' : 'Clarify Off'}
+                      </button>
+                      <button
+                        onClick={() => setEnableSelfCheck(!enableSelfCheck)}
+                        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[10px] font-medium border transition-all ${enableSelfCheck ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                        title="Runs a quick prompt quality review and improves if needed"
+                      >
+                        <Scale className="w-3 h-3" /> {enableSelfCheck ? 'QC On' : 'QC Off'}
+                      </button>
                       <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-yellow-50 border border-yellow-100 text-[10px] font-medium text-yellow-700"><Coins className="w-3 h-3" /> {costEstimate.cost}</div>
                     </div>
                     
@@ -787,35 +1090,77 @@ export default function PromptOptimizer() {
                 </div>
               </>
             )}
-          </div>
+          </Card>
         </div>
 
         {/* RIGHT PANEL: OUTPUT & HISTORY */}
         <div className="flex flex-col h-full bg-white overflow-hidden border-l border-gray-200">
           
           {/* Right Panel Tabs */}
-          <div className="flex border-b border-gray-100">
-            <button onClick={() => setRightPanelTab('output')} className={`flex-1 py-3 text-xs font-medium border-b-2 transition-all flex items-center justify-center gap-2 ${rightPanelTab === 'output' ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              <Sparkles className="w-3.5 h-3.5" /> Result
-            </button>
-            <button onClick={() => setRightPanelTab('history')} className={`flex-1 py-3 text-xs font-medium border-b-2 transition-all flex items-center justify-center gap-2 ${rightPanelTab === 'history' ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              <Clock className="w-3.5 h-3.5" /> History
-            </button>
-            <button onClick={() => setRightPanelTab('templates')} className={`flex-1 py-3 text-xs font-medium border-b-2 transition-all flex items-center justify-center gap-2 ${rightPanelTab === 'templates' ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
-              <BookTemplate className="w-3.5 h-3.5" /> Library
-            </button>
+          <div className="px-5 lg:px-6 pt-5 pb-3 bg-white border-b border-gray-100">
+            <div className="bg-gray-100 border border-gray-200 rounded-2xl p-1 flex items-center gap-1">
+              <button
+                onClick={() => setRightPanelTab('output')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  rightPanelTab === 'output'
+                    ? 'bg-white text-indigo-700 shadow-sm border border-gray-200'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-white/60'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Result
+              </button>
+              <button
+                onClick={() => setRightPanelTab('history')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  rightPanelTab === 'history'
+                    ? 'bg-white text-indigo-700 shadow-sm border border-gray-200'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-white/60'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" /> History
+              </button>
+              <button
+                onClick={() => setRightPanelTab('templates')}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  rightPanelTab === 'templates'
+                    ? 'bg-white text-indigo-700 shadow-sm border border-gray-200'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-white/60'
+                }`}
+              >
+                <BookTemplate className="w-3.5 h-3.5" /> Library
+              </button>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-gray-50/30 p-6">
+        <div className="flex-1 overflow-y-auto bg-gray-50/30 px-5 lg:px-6 pb-6">
             
             {/* TAB: OUTPUT */}
             {rightPanelTab === 'output' && (
               <div className="h-full flex flex-col">
                 {!resultData && !isGenerating ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                  <div className="flex flex-col items-center justify-center h-full text-gray-400 px-6">
                     <Terminal className="w-12 h-12 mb-4 opacity-20" />
-                    <p className="text-sm font-medium">Ready to optimize</p>
-                    <p className="text-xs opacity-70 mt-1">Select a model and click Generate</p>
+                    <p className="text-sm font-medium text-gray-600">Ready to optimize</p>
+                    <p className="text-xs opacity-80 mt-1 text-center">
+                      Pick a model, paste a raw prompt, then click <span className="font-semibold text-gray-600">Generate Prompt</span>.
+                    </p>
+                    <div className="mt-5 w-full max-w-xl">
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Quick start</div>
+                      <div className="flex flex-wrap gap-2">
+                        {(QUICK_START[selectedModel.id] || QUICK_START.gpt4).map((ex, idx) => (
+                          <button
+                            key={`rhs-ex-${idx}`}
+                            onClick={() => {
+                              setActiveBlueprintId('free');
+                              setFreeInput(ex);
+                            }}
+                            className="px-3 py-2 rounded-lg text-[11px] bg-white border border-gray-200 hover:border-indigo-300 hover:shadow-sm text-gray-700 transition-all"
+                          >
+                            {ex}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col flex-1 ${isGenerating && !resultData ? 'animate-pulse' : ''}`}>
@@ -823,7 +1168,7 @@ export default function PromptOptimizer() {
                     <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-white">
                       <span className="text-xs font-bold text-gray-700 flex items-center gap-2">
                         {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3 text-green-500" />}
-                        {isGenerating ? 'Processing...' : 'Optimized Result'}
+                        {isGenerating ? 'Processing...' : `Optimized Prompt • ${selectedModel.name}`}
                       </span>
                       {!isGenerating && resultData && (
                         <div className="flex gap-1">
@@ -843,15 +1188,15 @@ export default function PromptOptimizer() {
                           <div className="h-4 bg-gray-100 rounded w-5/6"></div>
                         </div>
                       ) : (
-                        <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 leading-relaxed">{resultData.prompt}</pre>
+                        <pre className="whitespace-pre-wrap font-mono text-[13px] text-slate-800 leading-relaxed">{resultData.prompt}</pre>
                       )}
                       {copied && <div className="absolute top-4 right-4 bg-black/75 text-white text-[10px] px-2 py-1 rounded fade-in">Copied!</div>}
                     </div>
 
                     {/* Output Notes Footer */}
                     {!isGenerating && resultData && resultData.notes && (
-                      <div className="bg-indigo-50/50 border-t border-indigo-100 p-4">
-                        <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2">Alchemy Analysis</h4>
+                    <div className="bg-indigo-50/50 border-t border-indigo-100 p-5">
+                        <h4 className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2">Why this works</h4>
                         <div className="space-y-1.5">
                           {resultData.notes.map((note, i) => (
                             <div key={i} className="flex items-start gap-2 text-xs text-indigo-900">
